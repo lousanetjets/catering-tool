@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flight Catering Recommendation Tool</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: transparent;
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .container {
+      width: 90%;
+      max-width: 1000px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 40px;
+      margin: 40px auto;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .header h1 {
+      font-size: 32px;
+      color: #2d3748;
+      margin: 0 0 10px 0;
+      font-weight: 700;
+    }
+    
+    .header p {
+      font-size: 16px;
+      color: #718096;
+      margin: 0;
+    }
+    
+    .section {
+      margin-bottom: 20px;
+      padding: 15px 20px;
+      background: #f7fafc;
+      border-radius: 8px;
+      border: 2px solid #e2e8f0;
+    }
+    
+    .section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2d3748;
+      margin: 0 0 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .section-title .icon {
+      font-size: 22px;
+    }
+    
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .option-button {
+      padding: 8px 16px;
+      border: 2px solid #cbd5e0;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: #4a5568;
+      transition: all 0.2s ease;
+      flex: 1;
+      min-width: 120px;
+    }
+    
+    .option-button:hover {
+      border-color: #667eea;
+      background: #f0f4ff;
+      transform: translateY(-2px);
+    }
+    
+    .option-button.selected {
+      background: #496C8B;
+      border-color: #496C8B;
+      color: white;
+      font-weight: bold;
+    }
+    
+    .reset-button {
+      width: 100%;
+      padding: 16px;
+      background: #C76666;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 20px;
+    }
+    
+    .reset-button:hover {
+      background: #b85555;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(199, 102, 102, 0.4);
+    }
+    
+    .recommendation-box {
+      margin-top: 30px;
+      padding: 30px;
+      background: #C1AF7A;
+      border-radius: 12px;
+      color: white;
+      display: none;
+    }
+    
+    .recommendation-box.show {
+      display: block;
+      animation: slideIn 0.4s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .recommendation-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0 0 15px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .recommendation-content {
+      font-size: 18px;
+      line-height: 1.6;
+      font-weight: 500;
+    }
+    
+    .selection-summary {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.3);
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .available-options-box {
+        margin-top: 20px;
+        padding: 25px;
+        background: #e2e8f0;
+        border-radius: 12px;
+        color: #2d3748;
+        display: none;
+    }
+    
+    .available-options-box.show {
+        display: block;
+        animation: slideIn 0.4s ease;
+    }
+    
+    .available-options-box h3 {
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0 0 15px 0;
+        color: #2d3748;
+    }
+    
+    .available-options-box h4 {
+        font-size: 16px;
+        font-weight: 600;
+        margin-top: 15px;
+        margin-bottom: 8px;
+        color: #4a5568;
+    }
+    
+    .available-options-box ul {
+        list-style-type: disc;
+        padding-left: 20px;
+        margin: 0;
+        font-size: 15px;
+    }
+    
+    .available-options-box li {
+        margin-bottom: 6px;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 25px;
+        margin: 20px;
+      }
+      
+      .header h1 {
+        font-size: 24px;
+      }
+      
+      .option-button {
+        min-width: 100%;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="container">
+   <div class="header">
+    <h1 id="tool-title">Flight Catering Recommendation Tool</h1>
+    <p id="tool-subtitle">Select travel details to get catering recommendations</p>
+   </div>
+   <div class="section">
+    <div class="section-title"><span class="icon">✈️</span> <span>Aircraft Type</span>
+    </div>
+    <div class="button-group">
+        <!-- Small Aircraft -->
+        <button class="option-button" data-category="aircraft" data-value="Phenom 300/E" data-size="Small">Phenom 300/E</button> 
+        <button class="option-button" data-category="aircraft" data-value="Citation XLS" data-size="Small">Citation XLS</button> 
+        <button class="option-button" data-category="aircraft" data-value="Citation Latitude" data-size="Small">Citation Latitude</button>
+        <!-- Mid Aircraft -->
+        <button class="option-button" data-category="aircraft" data-value="Challenger 350" data-size="Mid">Challenger 350</button>
+        <!-- Large Aircraft -->
+        <button class="option-button" data-category="aircraft" data-value="Challenger 650" data-size="Large">Challenger 650</button>
+        <button class="option-button" data-category="aircraft" data-value="Global 6000" data-size="Large">Global 6000</button>
+    </div>
+   </div>
+   <div class="section">
+    <div class="section-title"><span class="icon">⏰</span> <span>Time of Day</span>
+    </div>
+    <div class="button-group"><button class="option-button" data-category="time" data-value="06:00 - 11:00">06:00 - 11:00</button> <button class="option-button" data-category="time" data-value="11:00 - 14:00">11:00 - 14:00</button> <button class="option-button" data-category="time" data-value="14:00 - 17:00">14:00 - 17:00</button> <button class="option-button" data-category="time" data-value="17:00 - 22:00">17:00 - 22:00</button> <button class="option-button" data-category="time" data-value="22:00 - 06:00">22:00 - 06:00</button>
+    </div>
+   </div>
+   <div class="section">
+    <div class="section-title"><span class="icon">⏳</span> <span>Flight Duration</span>
+    </div>
+    <div class="button-group"><button class="option-button" data-category="duration" data-value="Less than 1 hour">Less than 1 hour</button> <button class="option-button" data-category="duration" data-value="1 to 2 hours">1 to 2 hours</button> <button class="option-button" data-category="duration" data-value="2 to 3 hours">2 to 3 hours</button> <button class="option-button" data-category="duration" data-value="More than 3 hours">More than 3 hours</button>
+    </div>
+   </div>
+   <div class="section">
+    <div class="section-title"><span class="icon">👥</span> <span>Number of Passengers</span>
+    </div>
+    <div class="button-group"><button class="option-button" data-category="passengers" data-value="1 - 4 passengers">1 - 4 passengers</button> <button class="option-button" data-category="passengers" data-value="5 or more passengers">5 or more passengers</button>
+    </div>
+   </div><button class="reset-button" id="reset-btn">🔄 <span id="reset-button-text">Reset All Selections</span></button>
+   <div class="recommendation-box" id="recommendation">
+    <div class="recommendation-title"><span>📋</span> <span>Catering Recommendation</span>
+    </div>
+    <div class="recommendation-content" id="recommendation-text"></div>
+    <div class="selection-summary" id="selection-summary"></div>
+   </div>
+   <div class="available-options-box" id="available-options">
+      <h3>Available Options</h3>
+      <div id="options-content"></div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      tool_title: "Flight Catering Recommendation Tool",
+      tool_subtitle: "Select travel details to get catering recommendations",
+      reset_button_text: "Reset All Selections",
+      background_color: "transparent",
+      surface_color: "#f7fafc",
+      text_color: "#2d3748",
+      primary_action_color: "#496C8B",
+      secondary_action_color: "#C76666",
+      font_family: "Inter",
+      font_size: 16
+    };
+
+    const selections = {
+      aircraft: null,       // Stores 'Small', 'Mid', or 'Large' for logic
+      aircraftModel: null,  // Stores the actual aircraft model for display
+      time: null,
+      duration: null,
+      passengers: null
+    };
+
+    // Catering recommendations data - THIS REMAINS UNCHANGED
+    const cateringData = {
+      "Small|06:00 - 11:00|Less than 1 hour|1 - 4 passengers": "Cold items only! 1 Breakfast Option + Fruit",
+      "Small|06:00 - 11:00|Less than 1 hour|5 or more passengers": "Cold items only! 1 Breakfast Option + Fruit",
+      "Small|06:00 - 11:00|1 to 2 hours|1 - 4 passengers": "Cold items only! 1 Breakfast Option + Fruit",
+      "Small|06:00 - 11:00|1 to 2 hours|5 or more passengers": "Cold items only! 1 Breakfast Option + Fruit",
+      "Small|06:00 - 11:00|2 to 3 hours|1 - 4 passengers": "Cold items only! 2 - 3 Breakfast Options + Fruit",
+      "Small|06:00 - 11:00|2 to 3 hours|5 or more passengers": "Cold items only! 2 - 3 Breakfast Options + Fruit",
+      "Small|06:00 - 11:00|More than 3 hours|1 - 4 passengers": "Cold items only! 2 - 3 Breakfast Options + Fruit",
+      "Small|06:00 - 11:00|More than 3 hours|5 or more passengers": "Cold items only! 2 - 3 Breakfast Options + Fruit",
+      "Small|11:00 - 14:00|Less than 1 hour|1 - 4 passengers": "Cold items only! 2 Lunch Options",
+      "Small|11:00 - 14:00|Less than 1 hour|5 or more passengers": "Cold items only! 2 Lunch Options",
+      "Small|11:00 - 14:00|1 to 2 hours|1 - 4 passengers": "Cold items only! 2 Lunch Options",
+      "Small|11:00 - 14:00|1 to 2 hours|5 or more passengers": "Cold items only! 2 Lunch Options",
+      "Small|11:00 - 14:00|2 to 3 hours|1 - 4 passengers": "Cold items only! 1 Lunch Option + 1 Snack Option + 1 Dessert Option",
+      "Small|11:00 - 14:00|2 to 3 hours|5 or more passengers": "Cold items only! 1 Lunch Option + 1 Snack Option + 1 Dessert Option",
+      "Small|11:00 - 14:00|More than 3 hours|1 - 4 passengers": "Cold items only! 1 Lunch Option + 1 Snack Option + 1 Dessert Option",
+      "Small|11:00 - 14:00|More than 3 hours|5 or more passengers": "Cold items only! 1 Lunch Option + 1 Snack Option + 1 Dessert Option",
+      "Small|14:00 - 17:00|Less than 1 hour|1 - 4 passengers": "Cold items only! 1 Lunch Option + 1 Snack Option or 2 Snack Options",
+      "Small|14:00 - 17:00|Less than 1 hour|5 or more passengers": "Cold items only! 1 Lunch Option + 1 Snack Option or 2 Snack Options",
+      "Small|14:00 - 17:00|1 to 2 hours|1 - 4 passengers": "Cold items only! 1 Lunch Option + 1 Snack Option + 1 Dessert Option or 2 Snack Options + 1 Dessert Option",
+      "Small|14:00 - 17:00|1 to 2 hours|5 or more passengers": "Cold items only! 1 Lunch Option + 1 Snack Option + 1 Dessert Option or 2 Snack Options + 1 Dessert Option",
+      "Small|14:00 - 17:00|2 to 3 hours|1 - 4 passengers": "Cold items only! 1 Lunch Option + 2 Snack Options + 1 Dessert Option",
+      "Small|14:00 - 17:00|2 to 3 hours|5 or more passengers": "Cold items only! 1 Lunch Option + 2 Snack Options + 1 Dessert Option",
+      "Small|14:00 - 17:00|More than 3 hours|1 - 4 passengers": "Cold items only! 1 Lunch Option + 2 Snack Options + 1 Dessert Option",
+      "Small|14:00 - 17:00|More than 3 hours|5 or more passengers": "Cold items only! 1 Lunch Option + 2 Snack Options + 1 Dessert Option",
+      "Small|17:00 - 22:00|Less than 1 hour|1 - 4 passengers": "Cold items only! 1 Dinner Option + 1 Snack Option + 1 Dessert Option",
+      "Small|17:00 - 22:00|Less than 1 hour|5 or more passengers": "Cold items only! 1 Dinner Option + 1 Snack Option + 1 Dessert Option",
+      "Small|17:00 - 22:00|1 to 2 hours|1 - 4 passengers": "Cold items only! 1 Dinner Option + 1 Snack Option + 1 Dessert Option",
+      "Small|17:00 - 22:00|1 to 2 hours|5 or more passengers": "Cold items only! 1 Dinner Option + 1 Snack Option + 1 Dessert Option",
+      "Small|17:00 - 22:00|2 to 3 hours|1 - 4 passengers": "Cold items only! 1 Dinner Option + 2 Snack Options + 1 Dessert Option",
+      "Small|17:00 - 22:00|2 to 3 hours|5 or more passengers": "Cold items only! 1 Dinner Option + 2 Snack Options + 1 Dessert Option",
+      "Small|17:00 - 22:00|More than 3 hours|1 - 4 passengers": "Cold items only! 1 Dinner Option + 3 Snack Options + 1 Dessert Option",
+      "Small|17:00 - 22:00|More than 3 hours|5 or more passengers": "Cold items only! 1 Dinner Option + 3 Snack Options + 1 Dessert Option",
+      "Small|22:00 - 06:00|Less than 1 hour|1 - 4 passengers": "Cold items only! 1 Snack Option",
+      "Small|22:00 - 06:00|Less than 1 hour|5 or more passengers": "Cold items only! 1 Snack Option",
+      "Small|22:00 - 06:00|1 to 2 hours|1 - 4 passengers": "Cold items only! 1 Snack Option + 1 Dessert Option",
+      "Small|22:00 - 06:00|1 to 2 hours|5 or more passengers": "Cold items only! 1 Snack Option + 1 Dessert Option",
+      "Small|22:00 - 06:00|2 to 3 hours|1 - 4 passengers": "Cold items only! 2 Snack Options + 1 Dessert Option",
+      "Small|22:00 - 06:00|2 to 3 hours|5 or more passengers": "Cold items only! 2 Snack Options + 1 Dessert Option",
+      "Small|22:00 - 06:00|More than 3 hours|1 - 4 passengers": "Cold items only! 2 Snack Options + 1 Dessert Option + 2 Breakfast Options",
+      "Small|22:00 - 06:00|More than 3 hours|5 or more passengers": "Cold items only! 2 Snack Options + 1 Dessert Option + 2 Breakfast Options",
+      "Large|06:00 - 11:00|Less than 1 hour|1 - 4 passengers": "Hot or Cold: 1 Breakfast Option + Fruit",
+      "Large|06:00 - 11:00|Less than 1 hour|5 or more passengers": "Cold items only! 1 Breakfast Option + Fruit",
+      "Large|06:00 - 11:00|1 to 2 hours|1 - 4 passengers": "Hot or Cold: 1 Breakfast Option + Fruit",
+      "Large|06:00 - 11:00|1 to 2 hours|5 or more passengers": "Hot or Cold: 1 Breakfast Option + Fruit",
+      "Large|06:00 - 11:00|2 to 3 hours|1 - 4 passengers": "2 - 3 Breakfast Options including 1 Hot Option + Fruit",
+      "Large|06:00 - 11:00|2 to 3 hours|5 or more passengers": "2 - 3 Breakfast Options including 1 Hot Option + Fruit",
+      "Large|06:00 - 11:00|More than 3 hours|1 - 4 passengers": "2 - 3 Breakfast Options including 1 Hot Option + Fruit + 2 Snack Options",
+      "Large|06:00 - 11:00|More than 3 hours|5 or more passengers": "2 - 3 Breakfast Options including 1 Hot Option + Fruit + 2 Snack Options",
+      "Large|11:00 - 14:00|Less than 1 hour|1 - 4 passengers": "Hot or Cold: 2 Course Meal",
+      "Large|11:00 - 14:00|Less than 1 hour|5 or more passengers": "Cold items only! 2 Course Meal",
+      "Large|11:00 - 14:00|1 to 2 hours|1 - 4 passengers": "Hot or Cold: 2 Course Meal",
+      "Large|11:00 - 14:00|1 to 2 hours|5 or more passengers": "Cold items only! 2 Course Meal",
+      "Large|11:00 - 14:00|2 to 3 hours|1 - 4 passengers": "Hot or Cold: 1 Lunch Option + 1 Snack Option + 1 Dessert Option",
+      "Large|11:00 - 14:00|2 to 3 hours|5 or more passengers": "Hot or Cold: 1 Lunch Option + 1 Snack Option + 1 Dessert Option",
+      "Large|11:00 - 14:00|More than 3 hours|1 - 4 passengers": "Hot or Cold: 1 Lunch Option + 2 Snack Options + 1 Dessert Option",
+      "Large|11:00 - 14:00|More than 3 hours|5 or more passengers": "Hot or Cold: 1 Lunch Option + 2 Snack Options + 1 Dessert Option",
+      "Large|14:00 - 17:00|Less than 1 hour|1 - 4 passengers": "Hot or Cold: 1 Lunch Option + 1 Snack Option or 2 Snack Options",
+      "Large|14:00 - 17:00|Less than 1 hour|5 or more passengers": "Hot or Cold: 1 Lunch Option + 1 Snack Option or 2 Snack Options",
+      "Large|14:00 - 17:00|1 to 2 hours|1 - 4 passengers": "Hot or Cold: 1 Lunch Option + 1 Snack Option + 1 Dessert Option or 2 Snack Options + 1 Dessert Option",
+      "Large|14:00 - 17:00|1 to 2 hours|5 or more passengers": "Hot or Cold: 1 Lunch Option + 1 Snack Option + 1 Dessert Option or 2 Snack Options + 1 Dessert Option",
+      "Large|14:00 - 17:00|2 to 3 hours|1 - 4 passengers": "Hot or Cold: 1 Lunch Option + 2 Snack Options + 1 Dessert Option",
+      "Large|14:00 - 17:00|2 to 3 hours|5 or more passengers": "Hot or Cold: 1 Lunch Option + 2 Snack Options + 1 Dessert Option",
+      "Large|14:00 - 17:00|More than 3 hours|1 - 4 passengers": "Hot or Cold: 1 Lunch Option + 2 Snack Options + 1 Dessert Option",
+      "Large|14:00 - 17:00|More than 3 hours|5 or more passengers": "Hot or Cold: 1 Lunch Option + 2 Snack Options + 1 Dessert Option",
+      "Large|17:00 - 22:00|Less than 1 hour|1 - 4 passengers": "Hot or Cold: 2 Course Meal",
+      "Large|17:00 - 22:00|Less than 1 hour|5 or more passengers": "Cold items only! 2 Course Meal",
+      "Large|17:00 - 22:00|1 to 2 hours|1 - 4 passengers": "Hot or Cold: 2 Course Meal",
+      "Large|17:00 - 22:00|1 to 2 hours|5 or more passengers": "Cold items only! 2 Course Meal",
+      "Large|17:00 - 22:00|2 to 3 hours|1 - 4 passengers": "Hot or Cold: 1 Dinner Option + 2 Snack Options + 1 Dessert Option",
+      "Large|17:00 - 22:00|2 to 3 hours|5 or more passengers": "Hot or Cold: 1 Dinner Option + 2 Snack Options + 1 Dessert Option",
+      "Large|17:00 - 22:00|More than 3 hours|1 - 4 passengers": "Hot or Cold: 1 Dinner Option + 2 Snack Options + 1 Dessert Option",
+      "Large|17:00 - 22:00|More than 3 hours|5 or more passengers": "Hot or Cold: 1 Dinner Option + 2 Snack Options + 1 Dessert Option",
+      "Large|22:00 - 06:00|Less than 1 hour|1 - 4 passengers": "Hot or Cold: 1 Snack Option",
+      "Large|22:00 - 06:00|Less than 1 hour|5 or more passengers": "Hot or Cold: 1 Snack Option",
+      "Large|22:00 - 06:00|1 to 2 hours|1 - 4 passengers": "Hot or Cold: 1 Snack Option + 1 Dessert Option",
+      "Large|22:00 - 06:00|1 to 2 hours|5 or more passengers": "Hot or Cold: 1 Snack Option + 1 Dessert Option",
+      "Large|22:00 - 06:00|2 to 3 hours|1 - 4 passengers": "Hot or Cold: 2 Snack Options + 1 Dessert Option",
+      "Large|22:00 - 06:00|2 to 3 hours|5 or more passengers": "Hot or Cold: 2 Snack Options + 1 Dessert Option",
+      "Large|22:00 - 06:00|More than 3 hours|1 - 4 passengers": "Hot or Cold: 2 Snack Options + 1 Dessert Option + 2 Breakfast Options",
+      "Large|22:00 - 06:00|More than 3 hours|5 or more passengers": "Hot or Cold: 2 Snack Options + 1 Dessert Option + 2 Breakfast Options",
+      "Mid|06:00 - 11:00|Less than 1 hour|1 - 4 passengers": "Cold items only! 1 Breakfast Option + Fruit",
+      "Mid|06:00 - 11:00|Less than 1 hour|5 or more passengers": "Cold items only! 1 Breakfast Option + Fruit",
+      "Mid|06:00 - 11:00|1 to 2 hours|1 - 4 passengers": "Hot or Cold: 1 Breakfast Option + Fruit",
+      "Mid|06:00 - 11:00|1 to 2 hours|5 or more passengers": "Cold items only! 1 Breakfast Option + Fruit",
+      "Mid|06:00 - 11:00|2 to 3 hours|1 - 4 passengers": "2-3 Breakfast Options including 1 Hot Option + Fruit",
+      "Mid|06:00 - 11:00|2 to 3 hours|5 or more passengers": "Cold items only! 2-3 Breakfast Options + Fruit",
+      "Mid|06:00 - 11:00|More than 3 hours|1 - 4 passengers": "2-3 Breakfast Options including 1 Hot Option + Fruit",
+      "Mid|06:00 - 11:00|More than 3 hours|5 or more passengers": "2-3 Breakfast Options including 1 Hot Option + Fruit",
+      "Mid|11:00 - 14:00|Less than 1 hour|1 - 4 passengers": "Cold items only! 2 Course Meal",
+      "Mid|11:00 - 14:00|Less than 1 hour|5 or more passengers": "Cold items only! 2 Course Meal",
+      "Mid|11:00 - 14:00|1 to 2 hours|1 - 4 passengers": "Hot or Cold: 2 Course Meal including 1 Hot Meal",
+      "Mid|11:00 - 14:00|1 to 2 hours|5 or more passengers": "Cold items only! 2 Course Meal",
+      "Mid|11:00 - 14:00|2 to 3 hours|1 - 4 passengers": "Hot or Cold: 1 Lunch Option + 1 Snack Option + 1 Dessert Option",
+      "Mid|11:00 - 14:00|2 to 3 hours|5 or more passengers": "Hot or Cold: 1 Lunch Option + 1 Snack Option + 1 Dessert Option",
+      "Mid|11:00 - 14:00|More than 3 hours|1 - 4 passengers": "Hot or Cold: 1 Lunch Option + 2 Snack Options + 1 Dessert Option",
+      "Mid|11:00 - 14:00|More than 3 hours|5 or more passengers": "Hot or Cold: 1 Lunch Option + 2 Snack Options + 1 Dessert Option",
+      "Mid|14:00 - 17:00|Less than 1 hour|1 - 4 passengers": "Cold items only! 1 Lunch Option + 1 Snack Option or 2 Snack Options",
+      "Mid|14:00 - 17:00|Less than 1 hour|5 or more passengers": "Cold items only! 1 Lunch Option + 1 Snack Option or 2 Snack Options",
+      "Mid|14:00 - 17:00|1 to 2 hours|1 - 4 passengers": "Hot or Cold: 1 Lunch Option + 1 Snack Option + 1 Dessert Option (maximum 1 Hot Option) or 2 Snack Options + 1 Dessert Option",
+      "Mid|14:00 - 17:00|1 to 2 hours|5 or more passengers": "Cold items only! 2 Snack Options + 1 Dessert Option",
+      "Mid|14:00 - 17:00|2 to 3 hours|1 - 4 passengers": "Hot or Cold: 1 Lunch Option + 2 Snack Options + 1 Dessert Option",
+      "Mid|14:00 - 17:00|2 to 3 hours|5 or more passengers": "Hot or Cold: 1 Lunch Option + 2 Snack Options + 1 Dessert Option",
+      "Mid|14:00 - 17:00|More than 3 hours|1 - 4 passengers": "Hot or Cold: 1 Lunch Option + 2 Snack Options + 1 Dessert Option",
+      "Mid|14:00 - 17:00|More than 3 hours|5 or more passengers": "Hot or Cold: 1 Lunch Option + 2 Snack Options + 1 Dessert Option",
+      "Mid|17:00 - 22:00|Less than 1 hour|1 - 4 passengers": "Cold items only! 2 Course Meal",
+      "Mid|17:00 - 22:00|Less than 1 hour|5 or more passengers": "Cold items only! 2 Course Meal",
+      "Mid|17:00 - 22:00|1 to 2 hours|1 - 4 passengers": "Hot or Cold: 2 Dinner Options + 1 Snack Option + 1 Dessert Option",
+      "Mid|17:00 - 22:00|1 to 2 hours|5 or more passengers": "Cold items only! 2 Dinner Options + 1 Snack Option + 1 Dessert Option",
+      "Mid|17:00 - 22:00|2 to 3 hours|1 - 4 passengers": "Hot or Cold: 1 Dinner Option + 2 Snack Options + 1 Dessert Option",
+      "Mid|17:00 - 22:00|2 to 3 hours|5 or more passengers": "Hot or Cold: 1 Dinner Option + 2 Snack Options + 1 Dessert Option",
+      "Mid|17:00 - 22:00|More than 3 hours|1 - 4 passengers": "Hot or Cold: 1 Dinner Option + 3 Snack Options + 1 Dessert Option",
+      "Mid|17:00 - 22:00|More than 3 hours|5 or more passengers": "Hot or Cold: 1 Dinner Option + 3 Snack Options + 1 Dessert Option",
+      "Mid|22:00 - 06:00|Less than 1 hour|1 - 4 passengers": "Cold items only! 1 Snack Option",
+      "Mid|22:00 - 06:00|Less than 1 hour|5 or more passengers": "Cold items only! 1 Snack Option",
+      "Mid|22:00 - 06:00|1 to 2 hours|1 - 4 passengers": "Cold items only! 1 Snack Option + 1 Dessert Option",
+      "Mid|22:00 - 06:00|1 to 2 hours|5 or more passengers": "Cold items only! 1 Snack Option + 1 Dessert Option",
+      "Mid|22:00 - 06:00|2 to 3 hours|1 - 4 passengers": "Cold items only! 2 Snack Options + 1 Dessert Option",
+      "Mid|22:00 - 06:00|2 to 3 hours|5 or more passengers": "Cold items only! 2 Snack Options + 1 Dessert Option",
+      "Mid|22:00 - 06:00|More than 3 hours|1 - 4 passengers": "Cold items only! 2 Snack Options + 1 Dessert Option + 2 Breakfast Options",
+      "Mid|22:00 - 06:00|More than 3 hours|5 or more passengers": "Cold items only! 2 Snack Options + 1 Dessert Option + 2 Breakfast Options"
+    };
+    
+    const availableOptionsData = {
+        breakfast: ["Signature Selections", "Sliced fruit", "Continental breakfast", "Smoked salmon", "Cheese selection", "Breakfast pastry selection", "Granola and yoghurt parfait", "Scrambled eggs or omelettes"],
+        lunch: ["Signature Selections", "Sliced fruit", "Assorted sandwiches", "Smoked salmon and bagels", "Cured meats and cheeses", "Artisan cheese selection", "Sharing or grazing platters"],
+        snack: ["Signature Selections", "Cured meats and cheese, antipasto selection", "Open or deli sandwich selection", "Artisan cheese", "Grazing platters, mezze", "Crudités and dips", "Seafood selection"],
+        dinner: ["Signature Selections", "Beef, chicken, fish main meals", "Main meal salads", "Pasta or risotto", "Large cabin à la carte menus"],
+        dessert: ["Large cabin dessert menus", "Chocolate brownies or freshly baked cookies", "Petit fours"]
+    };
+
+    function handleButtonClick(event) {
+      const button = event.target.closest('.option-button');
+      if (!button) return;
+      
+      const category = button.dataset.category;
+      const value = button.dataset.value;
+      
+      document.querySelectorAll(`[data-category="${category}"]`).forEach(btn => {
+        btn.classList.remove('selected');
+      });
+      
+      button.classList.add('selected');
+
+      // If the aircraft is selected, store both its size (for logic) and model name (for display)
+      if (category === 'aircraft') {
+        selections.aircraft = button.dataset.size;
+        selections.aircraftModel = value;
+      } else {
+        selections[category] = value;
+      }
+      
+      updateRecommendation();
+    }
+
+    function displayAvailableOptions(recommendationText) {
+        const optionsContentEl = document.getElementById('options-content');
+        const availableOptionsEl = document.getElementById('available-options');
+        let htmlContent = '';
+        const lowerCaseRec = recommendationText.toLowerCase();
+
+        const mealTypes = {
+            breakfast: "Breakfast Options",
+            lunch: "Lunch Options",
+            snack: "Snack Options",
+            dinner: "Dinner Options",
+            dessert: "Dessert Options"
+        };
+        
+        if (lowerCaseRec.includes('course meal')) {
+            if (!lowerCaseRec.includes('lunch')) {
+                 htmlContent += `<h4>Lunch Options</h4><ul>${availableOptionsData.lunch.map(item => `<li>${item}</li>`).join('')}</ul>`;
+            }
+            if (!lowerCaseRec.includes('dinner')) {
+                 htmlContent += `<h4>Dinner Options</h4><ul>${availableOptionsData.dinner.map(item => `<li>${item}</li>`).join('')}</ul>`;
+            }
+        }
+
+        for (const type in mealTypes) {
+            if (lowerCaseRec.includes(type)) {
+                htmlContent += `<h4>${mealTypes[type]}</h4><ul>`;
+                htmlContent += availableOptionsData[type].map(item => `<li>${item}</li>`).join('');
+                htmlContent += '</ul>';
+            }
+        }
+        
+        if (htmlContent) {
+            optionsContentEl.innerHTML = htmlContent;
+            availableOptionsEl.classList.add('show');
+        } else {
+            optionsContentEl.innerHTML = '';
+            availableOptionsEl.classList.remove('show');
+        }
+    }
+
+    function updateRecommendation() {
+      const { aircraft, aircraftModel, time, duration, passengers } = selections;
+      const recommendationEl = document.getElementById('recommendation');
+      
+      if (aircraft && time && duration && passengers) {
+        const key = `${aircraft}|${time}|${duration}|${passengers}`;
+        const recommendationText = cateringData[key] || "No recommendation available for this combination.";
+        
+        document.getElementById('recommendation-text').textContent = recommendationText;
+        document.getElementById('selection-summary').innerHTML = `
+          <strong>Selected:</strong> ${aircraftModel}, ${time}, ${duration}, ${passengers}
+        `;
+        recommendationEl.classList.add('show');
+        displayAvailableOptions(recommendationText);
+      } else {
+        recommendationEl.classList.remove('show');
+        document.getElementById('available-options').classList.remove('show');
+      }
+    }
+
+    function resetSelections() {
+      selections.aircraft = null;
+      selections.aircraftModel = null;
+      selections.time = null;
+      selections.duration = null;
+      selections.passengers = null;
+      
+      document.querySelectorAll('.option-button').forEach(btn => {
+        btn.classList.remove('selected');
+      });
+      
+      document.getElementById('recommendation').classList.remove('show');
+      document.getElementById('available-options').classList.remove('show');
+    }
+
+    // Event listeners
+    document.querySelectorAll('.option-button').forEach(button => {
+      button.addEventListener('click', handleButtonClick);
+    });
+
+    document.getElementById('reset-btn').addEventListener('click', resetSelections);
+
+    // Element SDK configuration
+    async function onConfigChange(config) {
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      const baseFontStack = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      
+      document.getElementById('tool-title').textContent = config.tool_title || defaultConfig.tool_title;
+      document.getElementById('tool-subtitle').textContent = config.tool_subtitle || defaultConfig.tool_subtitle;
+      document.getElementById('reset-button-text').textContent = config.reset_button_text || defaultConfig.reset_button_text;
+      document.body.style.background = config.background_color || defaultConfig.background_color;
+      
+      document.querySelectorAll('.section').forEach(section => {
+        section.style.background = config.surface_color || defaultConfig.surface_color;
+      });
+      
+      document.querySelectorAll('.header h1, .section-title').forEach(el => {
+        el.style.color = config.text_color || defaultConfig.text_color;
+        el.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      });
+      
+      document.querySelector('.header h1').style.fontSize = `${baseSize * 2}px`;
+      document.querySelector('.header p').style.fontSize = `${baseSize}px`;
+      document.querySelectorAll('.section-title').forEach(el => {
+        el.style.fontSize = `${baseSize * 1.125}px`;
+      });
+      
+      document.querySelectorAll('.option-button').forEach(btn => {
+        btn.style.fontFamily = `${customFont}, ${baseFontStack}`;
+        btn.style.fontSize = `${baseSize * 0.875}px`;
+        btn.style.color = config.text_color || defaultConfig.text_color;
+        btn.style.borderColor = '#cbd5e0';
+      });
+      
+      document.querySelectorAll('.option-button.selected').forEach(btn => {
+        btn.style.background = config.primary_action_color || defaultConfig.primary_action_color;
+        btn.style.borderColor = config.primary_action_color || defaultConfig.primary_action_color;
+        btn.style.color = 'white';
+      });
+      
+      const resetBtn = document.querySelector('.reset-button');
+      resetBtn.style.background = config.secondary_action_color || defaultConfig.secondary_action_color;
+      resetBtn.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      resetBtn.style.fontSize = `${baseSize}px`;
+      
+      const recBox = document.querySelector('.recommendation-box');
+      recBox.style.background = '#C1AF7A';
+      
+      document.querySelector('.recommendation-title').style.fontSize = `${baseSize * 1.375}px`;
+      document.querySelector('.recommendation-content').style.fontSize = `${baseSize * 1.125}px`;
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            { get: () => config.background_color || defaultConfig.background_color, set: (value) => { config.background_color = value; window.elementSdk.setConfig({ background_color: value }); } },
+            { get: () => config.surface_color || defaultConfig.surface_color, set: (value) => { config.surface_color = value; window.elementSdk.setConfig({ surface_color: value }); } },
+            { get: () => config.text_color || defaultConfig.text_color, set: (value) => { config.text_color = value; window.elementSdk.setConfig({ text_color: value }); } },
+            { get: () => config.primary_action_color || defaultConfig.primary_action_color, set: (value) => { config.primary_action_color = value; window.elementSdk.setConfig({ primary_action_color: value }); } },
+            { get: () => config.secondary_action_color || defaultConfig.secondary_action_color, set: (value) => { config.secondary_action_color = value; window.elementSdk.setConfig({ secondary_action_color: value }); } }
+          ],
+          borderables: [],
+          fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (value) => { config.font_family = value; window.elementSdk.setConfig({ font_family: value }); } },
+          fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (value) => { config.font_size = value; window.elementSdk.setConfig({ font_size: value }); } }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["tool_title", config.tool_title || defaultConfig.tool_title],
+          ["tool_subtitle", config.tool_subtitle || defaultConfig.tool_subtitle],
+          ["reset_button_text", config.reset_button_text || defaultConfig.reset_button_text]
+        ])
+      });
+    }
+  </script>
+ </body>
+</html>
